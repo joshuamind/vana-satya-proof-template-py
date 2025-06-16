@@ -21,38 +21,43 @@ class Proof:
         account_email = None
         total_score = 0
 
-        for input_filename in os.listdir(self.config['input_dir']):
-            input_file = os.path.join(self.config['input_dir'], input_filename)
-            if os.path.splitext(input_file)[1].lower() == '.json':
-                with open(input_file, 'r') as f:
-                    input_data = json.load(f)
+         # 假设 input_dir 下只有一个文件
+        input_filenames = [
+            f for f in os.listdir(self.config['input_dir'])
+            if f.startswith('vana_') and os.path.isfile(os.path.join(self.config['input_dir'], f))
+        ]
+        
+        if not input_filenames:
+            raise FileNotFoundError(f"No input files found in {self.config['input_dir']}")
 
-                    if input_filename == 'account.json':
-                        account_email = input_data.get('email', None)
-                        continue
+        input_file_path = os.path.join(self.config['input_dir'], input_filenames[0])
 
-                    elif input_filename == 'activity.json':
-                        total_score = sum(item['score'] for item in input_data)
-                        continue
-
-        email_matches = self.config['user_email'] == account_email
-        score_threshold = fetch_random_number()
+        try:
+            with open(input_file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+                wallet_address = data.get('walletAddress')
+                file_hash = data.get('fileHash')
+                logging.info(f"Loaded wallet: {wallet_address}, fileHash: {file_hash}")
+                result = verify_wallet(wallet_address, file_hash)
+                logging.info(f"Verification result: {result}")
+        except Exception as e:
+            logging.error(f"Error reading input file: {e}")
+            raise e
+            
 
         # Calculate proof-of-contribution scores: https://docs.vana.org/vana/core-concepts/key-elements/proof-of-contribution/example-implementation
-        self.proof_response.ownership = 1.0 if email_matches else 0.0  # Does the data belong to the user? Or is it fraudulent?
-        self.proof_response.quality = max(0, min(total_score / score_threshold, 1.0))  # How high quality is the data?
-        self.proof_response.authenticity = 0  # How authentic is the data is (ie: not tampered with)? (Not implemented here)
-        self.proof_response.uniqueness = 0  # How unique is the data relative to other datasets? (Not implemented here)
+        self.proof_response.ownership = 1.0 # Does the data belong to the user? Or is it fraudulent?
+        self.proof_response.quality = 1.0   # How high quality is the data?
+        self.proof_response.authenticity = 1.0  # How authentic is the data is (ie: not tampered with)? (Not implemented here)
+        self.proof_response.uniqueness = 1.0  # How unique is the data relative to other datasets? (Not implemented here)
 
         # Calculate overall score and validity
-        self.proof_response.score = 0.6 * self.proof_response.quality + 0.4 * self.proof_response.ownership
-        self.proof_response.valid = email_matches
+        self.proof_response.score = 1.0 if result.get("data") else 0.0
+        self.proof_response.valid = result.get("data",False)
 
         # Additional (public) properties to include in the proof about the data
         self.proof_response.attributes = {
             'total_score': total_score,
-            'score_threshold': score_threshold,
-            'email_verified': email_matches,
         }
 
         # Additional metadata about the proof, written onchain
@@ -71,3 +76,15 @@ def fetch_random_number() -> float:
     except requests.RequestException as e:
         logging.warning(f"Error fetching random number: {e}. Using local random.")
         return __import__('random').random()
+
+
+def verify_wallet(wallet_address: str, file_hash: str) -> dict:
+    url = 'https://mcp-api.mindnetwork.io/health-hub/verify/check'
+    payload = {
+        'walletAddress': wallet_address,
+        'fileHash': file_hash
+    }
+
+    response = requests.post(url, json=payload)
+    response.raise_for_status()  
+    return response.json()

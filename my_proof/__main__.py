@@ -49,7 +49,6 @@ def extract_input() -> None:
     """
     for input_filename in os.listdir(INPUT_DIR):
         input_file = os.path.join(INPUT_DIR, input_filename)
-
         if zipfile.is_zipfile(input_file):
             with zipfile.ZipFile(input_file, 'r') as zip_ref:
                 zip_ref.extractall(INPUT_DIR)
