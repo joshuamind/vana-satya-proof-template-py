@@ -47,11 +47,20 @@ def extract_input() -> None:
     If the input directory contains any zip files, extract them
     :return:
     """
-    for input_filename in os.listdir(INPUT_DIR):
-        input_file = os.path.join(INPUT_DIR, input_filename)
-        if zipfile.is_zipfile(input_file):
-            with zipfile.ZipFile(input_file, 'r') as zip_ref:
-                zip_ref.extractall(INPUT_DIR)
+    # for input_filename in os.listdir(INPUT_DIR):
+    #     input_file = os.path.join(INPUT_DIR, input_filename)
+    #     if zipfile.is_zipfile(input_file):
+    #         with zipfile.ZipFile(input_file, 'r') as zip_ref:
+    #             zip_ref.extractall(INPUT_DIR)
+    zip_file_path = os.path.join(INPUT_DIR, 'decrypted_file.zip')
+    if not os.path.exists(zip_file_path):
+        raise FileNotFoundError(f"Zip file not found: {zip_file_path}")
+
+    if not zipfile.is_zipfile(zip_file_path):
+        raise ValueError(f"File is not a valid zip archive: {zip_file_path}")
+
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        zip_ref.extractall(INPUT_DIR)
 
 
 if __name__ == "__main__":
