@@ -21,7 +21,6 @@ class Proof:
         account_email = None
         total_score = 0
 
-         # 假设 input_dir 下只有一个文件
         input_filenames = [
             f for f in os.listdir(self.config['input_dir'])
             if f.startswith('vana_') and os.path.isfile(os.path.join(self.config['input_dir'], f))
