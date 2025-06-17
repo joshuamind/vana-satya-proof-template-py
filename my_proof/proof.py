@@ -18,16 +18,20 @@ class Proof:
         logging.info("Starting proof generation")
 
         # Iterate through files and calculate data validity
-        account_email = None
         total_score = 0
 
+        all_filenames = os.listdir(self.config['input_dir'])
+
         input_filenames = [
-            f for f in os.listdir(self.config['input_dir'])
+            f for f in all_filenames
             if f.startswith('vana_') and os.path.isfile(os.path.join(self.config['input_dir'], f))
         ]
         
         if not input_filenames:
-            raise FileNotFoundError(f"No input files found in {self.config['input_dir']}")
+            raise FileNotFoundError(
+            f"No input files starting with 'vana_' found in {self.config['input_dir']}. "
+            f"Files in directory: {all_filenames}"
+        )
 
         input_file_path = os.path.join(self.config['input_dir'], input_filenames[0])
 
