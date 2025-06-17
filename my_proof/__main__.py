@@ -60,13 +60,13 @@ def extract_input() -> None:
     if not os.path.exists(zip_file_path):
         raise FileNotFoundError(f"Zip file not found: {zip_file_path}")
 
-    if not zipfile.is_zipfile(zip_file_path):
-        raise ValueError(f"File is not a valid zip archive: {zip_file_path}")
-    
-    
-
-    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-        zip_ref.extractall(INPUT_DIR)
+    try:
+        with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+            # zip_ref.extractall(INPUT_DIR)
+            print("Valid zip file")
+            raise ValueError(zip_ref.namelist())
+    except zipfile.BadZipFile:
+        raise ValueError(f"Bad zip file: {zip_file_path}")
 
 
 if __name__ == "__main__":
