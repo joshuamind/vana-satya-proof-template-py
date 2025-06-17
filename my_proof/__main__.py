@@ -58,6 +58,9 @@ def extract_input() -> None:
 
     if not zipfile.is_zipfile(zip_file_path):
         raise ValueError(f"File is not a valid zip archive: {zip_file_path}")
+    
+    file_size = os.path.getsize(zip_file_path)
+    print(f"{zip_file_path}， fileSize：{file_size} bytes")
 
     with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
         zip_ref.extractall(INPUT_DIR)
