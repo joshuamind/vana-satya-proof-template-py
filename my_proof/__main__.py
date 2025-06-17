@@ -53,14 +53,17 @@ def extract_input() -> None:
     #         with zipfile.ZipFile(input_file, 'r') as zip_ref:
     #             zip_ref.extractall(INPUT_DIR)
     zip_file_path = os.path.join(INPUT_DIR, 'decrypted_file.zip')
+
+    file_size = os.path.getsize(zip_file_path)
+    print(f"{zip_file_path}， fileSize：{file_size} bytes")
+
     if not os.path.exists(zip_file_path):
         raise FileNotFoundError(f"Zip file not found: {zip_file_path}")
 
     if not zipfile.is_zipfile(zip_file_path):
         raise ValueError(f"File is not a valid zip archive: {zip_file_path}")
     
-    file_size = os.path.getsize(zip_file_path)
-    print(f"{zip_file_path}， fileSize：{file_size} bytes")
+    
 
     with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
         zip_ref.extractall(INPUT_DIR)
