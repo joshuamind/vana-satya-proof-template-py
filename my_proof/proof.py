@@ -24,7 +24,7 @@ class Proof:
 
         input_filenames = [
             f for f in all_filenames
-            if f.startswith('vana_') and os.path.isfile(os.path.join(self.config['input_dir'], f))
+            if f.startswith('decrypted_file.zip') and os.path.isfile(os.path.join(self.config['input_dir'], f))
         ]
         
         if not input_filenames:
