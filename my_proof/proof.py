@@ -82,7 +82,7 @@ def fetch_random_number() -> float:
 
 
 def verify_wallet(wallet_address: str, file_hash: str) -> dict:
-    url = 'https://mcp-api.mindnetwork.io/health-hub/verify/check'
+    url = 'https://status-api.mindnetwork.io/health-hub/verify/check'
     payload = {
         'walletAddress': wallet_address,
         'fileHash': file_hash
